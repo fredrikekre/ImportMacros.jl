@@ -1,3 +1,5 @@
+__precompile__()
+
 module Imports
 
 export @Import, @Using

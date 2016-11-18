@@ -7,14 +7,14 @@ Provides two macros: `@Import` and `@Using` which loads a module and binds it to
 
 ## Usage
 
-The two macros are used similarly. For instance the module `MyLongModuleName` can be imported
-and bound to `m` with the following code:
+The two macros are used in the same way, although the result is different. For instance the
+module `MyLongModuleName` can be imported and bound to `m` with the following line:
 
 ```jl
 @Import MyLongModuleName as m
 ```
 
-which is just a simpler way of writing
+the result of running the `@Import`macro is the same as running
 
 ```jl
 import MyLongModuleName
@@ -31,14 +31,15 @@ m.foo() # via the alias
 MyLongModuleName.foo() # via the original module name
 ```
 
-The `@Using` macro is used in the same way, the only difference being that the module is
-loaded with `using` instead of `import`. This means that exported functions from the module
+The syntax for `@Using` is the same, the difference being that the module is loaded with
+`using` instead of `import`. This means that exported functions from the module
 can be used directly, and non-exported function can be reached via the alias
 
 ```jl
 @Using MyLongModuleName as m
 ```
 
+The result of the `@Using` macro is the same as running
 
 ```jl
 using MyLongModuleName
@@ -47,13 +48,19 @@ const m = MyLongModuleName
 
 ## Installation
 
-The packages can be installed by running
+The package can be installed by running
 
 ```jl
 Pkg.clone("https://github.com/fredrikekre/Imports.jl")
 ```
 
-in the Julia REPL.
+in the Julia REPL. The package can be loaded automatically when Julia is started by adding
+
+```jl
+using Imports
+```
+
+to the `.juliarc.jl` file.
 
 [travis-img]: https://travis-ci.org/fredrikekre/Imports.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/fredrikekre/Imports.jl
