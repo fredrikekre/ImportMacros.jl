@@ -1,6 +1,6 @@
 __precompile__()
 
-module Imports
+module ImportMacros
 
 export @Import, @Using
 

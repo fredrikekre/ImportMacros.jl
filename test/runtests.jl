@@ -1,4 +1,4 @@
-using Imports
+using ImportMacros
 using Base.Test
 
 module A

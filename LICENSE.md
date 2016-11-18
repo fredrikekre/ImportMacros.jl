@@ -1,4 +1,4 @@
-The Imports.jl package is licensed under the MIT "Expat" License:
+The ImportMacros.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2016: Fredrik Ekre.
 > 

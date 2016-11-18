@@ -1,4 +1,4 @@
-# Imports.jl
+# ImportMacros.jl
 
 [![Build Status][travis-img]][travis-url]
 [![Build status][appveyor-img]][appveyor-url]
@@ -51,19 +51,19 @@ const m = MyLongModuleName
 The package can be installed by running
 
 ```jl
-Pkg.clone("https://github.com/fredrikekre/Imports.jl")
+Pkg.clone("https://github.com/fredrikekre/ImportMacros.jl")
 ```
 
 in the Julia REPL. The package can be loaded automatically when Julia is started by adding
 
 ```jl
-using Imports
+using ImportMacros
 ```
 
 to the `.juliarc.jl` file.
 
-[travis-img]: https://travis-ci.org/fredrikekre/Imports.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/fredrikekre/Imports.jl
+[travis-img]: https://travis-ci.org/fredrikekre/ImportMacros.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/fredrikekre/ImportMacros.jl
 
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/ue16j31vjfnm2ask/branch/master?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/fredrikekre/imports-jl/branch/master
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/ds4d6njhs1t69aak/branch/master?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/fredrikekre/importmacros-jl/branch/master
