@@ -17,52 +17,52 @@ module A
     end
 end
 
-@testset "@Import" begin
+@testset "@import" begin
     # A
-    @test (@Import A as a) == nothing
-    @Import A as a
+    @test (@import A as a) == nothing
+    @import A as a
     @test_throws UndefVarError foo()
     @test_throws UndefVarError Foo()
     @test a.foo()
     @test a.Foo()
 
     # A.B
-    @test (@Import A.B as ab) == nothing
-    @Import A.B as ab
+    @test (@import A.B as ab) == nothing
+    @import A.B as ab
     @test_throws UndefVarError bar()
     @test_throws UndefVarError Bar()
     @test ab.bar()
     @test ab.Bar()
 
     # A.B.C
-    @test (@Import A.B.C as abc) == nothing
-    @Import A.B.C as abc
+    @test (@import A.B.C as abc) == nothing
+    @import A.B.C as abc
     @test_throws UndefVarError baz()
     @test_throws UndefVarError Baz()
     @test abc.baz()
     @test abc.Baz()
 end # testset
 
-@testset "@Using" begin
+@testset "@using" begin
     # A
-    @test (@Using A as a) == nothing
-    @Using A as a
+    @test (@using A as a) == nothing
+    @using A as a
     @test foo()
     @test_throws UndefVarError Foo()
     @test a.foo()
     @test a.Foo()
 
     # A.B
-    @test (@Using A.B as ab) == nothing
-    @Using A.B as ab
+    @test (@using A.B as ab) == nothing
+    @using A.B as ab
     @test bar()
     @test_throws UndefVarError Bar()
     @test ab.bar()
     @test ab.Bar()
 
     # A.B.C
-    @test (@Using A.B.C as abc) == nothing
-    @Using A.B.C as abc
+    @test (@using A.B.C as abc) == nothing
+    @using A.B.C as abc
     @test baz()
     @test_throws UndefVarError Baz()
     @test abc.baz()

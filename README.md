@@ -3,7 +3,7 @@
 [![Build Status][travis-img]][travis-url]
 [![Build status][appveyor-img]][appveyor-url]
 
-Provides two macros: `@Import` and `@Using` which loads a module and binds it to an alias.
+Provides two macros: `@import` and `@using` which loads a module and binds it to an alias.
 
 ## Usage
 
@@ -11,10 +11,10 @@ The two macros are used in the same way, although the result is different. For i
 module `MyLongModuleName` can be imported and bound to `m` with the following line:
 
 ```jl
-@Import MyLongModuleName as m
+@import MyLongModuleName as m
 ```
 
-the result of running the `@Import`macro is the same as running
+the result of running the `@import`macro is the same as running
 
 ```jl
 import MyLongModuleName
@@ -31,15 +31,15 @@ m.foo() # via the alias
 MyLongModuleName.foo() # via the original module name
 ```
 
-The syntax for `@Using` is the same, the difference being that the module is loaded with
+The syntax for `@using` is the same, the difference being that the module is loaded with
 `using` instead of `import`. This means that exported functions from the module
 can be used directly, and non-exported function can be reached via the alias
 
 ```jl
-@Using MyLongModuleName as m
+@using MyLongModuleName as m
 ```
 
-The result of the `@Using` macro is the same as running
+The result of the `@using` macro is the same as running
 
 ```jl
 using MyLongModuleName

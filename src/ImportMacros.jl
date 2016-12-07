@@ -2,11 +2,11 @@ __precompile__()
 
 module ImportMacros
 
-export @Import, @Using
+export @import, @using
 
 """
 ```julia
-@Import MyLongModuleName as m
+@import MyLongModuleName as m
 ```
 
 Load the module `MyLongModuleName` with `import` and binds it to `m`.
@@ -17,11 +17,11 @@ import MyLongModuleName
 const m = MyLongModuleName
 ```
 """
-:(@Import)
+:(@import)
 
 """
 ```julia
-@Using MyLongModuleName as m
+@using MyLongModuleName as m
 ```
 
 Load the module `MyLongModuleName` with `using` and binds it to `m`.
@@ -32,19 +32,19 @@ using MyLongModuleName
 const m = MyLongModuleName
 ```
 """
-:(@Using)
+:(@using)
 
 # generate the macros
-for (macroname, operator) in ((:Import, "import"), (:Using, "using"))
+for macroname in ("import", "using")
     @eval begin
-        macro $macroname(M::Union{Symbol, Expr}, kw::Symbol, m::Symbol)
+        macro $(Symbol(macroname))(M::Union{Symbol, Expr}, kw::Symbol, m::Symbol)
             # input check
             kw == :as || throw(ArgumentError("syntax error: expected `as`, got `$kw`"))
             isdefined(m) && throw(ArgumentError("alias `$m` already defined"))
 
             # create operator expression
             names = get_names(M)
-            ex = Expr(Symbol($operator))
+            ex = Expr(Symbol($macroname))
             for n in names
                 push!(ex.args, n)
             end
