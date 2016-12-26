@@ -31,20 +31,9 @@ m.foo() # via the alias
 MyLongModuleName.foo() # via the original module name
 ```
 
-The syntax for `@using` is the same, the difference being that the module is loaded with
+The syntax for `@using` is the same as for `@import`, the difference being that the module is loaded with
 `using` instead of `import`. This means that exported functions from the module
-can be used directly, and non-exported function can be reached via the alias
-
-```jl
-@using MyLongModuleName as m
-```
-
-The result of the `@using` macro is the same as running
-
-```jl
-using MyLongModuleName
-const m = MyLongModuleName
-```
+can be used directly, and non-exported function can be reached via the alias.
 
 ## Installation
 
