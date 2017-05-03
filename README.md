@@ -3,11 +3,12 @@
 [![Build Status][travis-img]][travis-url]
 [![Build status][appveyor-img]][appveyor-url]
 
-Provides two macros: `@import` and `@using` which loads a module and binds it to an alias.
+Provides three macros: `@import` and `@using` which loads a module and binds it to an alias, and
+`@from` which loads an object from a module and binds it to an alias.
 
 ## Usage
 
-The two macros are used in the same way, although the result is different. For instance the
+`@import` and `@using` macros are used in the same way, although the result is different. For instance the
 module `MyLongModuleName` can be imported and bound to `m` with the following line:
 
 ```jl
@@ -34,6 +35,18 @@ MyLongModuleName.foo() # via the original module name
 The syntax for `@using` is the same as for `@import`, the difference being that the module is loaded with
 `using` instead of `import`. This means that exported functions from the module
 can be used directly, and non-exported function can be reached via the alias.
+
+The syntax for `@from` is as follows:
+
+```jl
+@from MyModule use my_long_variable_name as v
+```
+
+In order to alias a macro use `@` before the macro name:
+
+```jl
+@from MyModule use @my_long_macro_name as @m
+```
 
 ## Installation
 
