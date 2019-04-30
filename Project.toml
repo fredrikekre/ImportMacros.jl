@@ -2,11 +2,7 @@ name = "ImportMacros"
 uuid = "92a963f6-6b1d-11e9-1d6c-8d25856e017b"
 version = "0.1.0"
 
-[deps]
-MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-
 [compat]
-MacroTools = "0.5"
 julia = "1"
 
 [extras]

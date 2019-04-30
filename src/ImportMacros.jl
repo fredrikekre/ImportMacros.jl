@@ -1,7 +1,5 @@
 module ImportMacros
 
-using MacroTools: @capture
-
 export @import, @using, @from
 
 
@@ -105,8 +103,19 @@ macro from(_module::Union{Symbol, Expr}, use::Symbol, object::Symbol, as::Symbol
     _from(condition, FROM_USAGE, _module, object, alias)
 end
 
-macro from(_module::Union{Expr, Symbol}, use::Symbol, object_as_alias::Expr)
-    condition = use == :use && @capture(object_as_alias, @object_ as @alias_)
+macro from(_module::Union{Expr, Symbol}, use::Symbol, expr::Expr)
+    # expr is something like :(@f as @F)
+    object = nothing
+    alias = nothing
+    if expr.head === :macrocall && expr.args[1] isa Symbol
+        object = expr.args[1]
+        if expr.args[2] isa LineNumberNode && expr.args[3] === :as &&
+           expr.args[4] isa Expr && expr.args[4].head === :macrocall &&
+           expr.args[4].args[1] isa Symbol
+           alias = expr.args[4].args[1]
+        end
+    end
+    condition = use == :use && object !== nothing && alias !== nothing
     _from(condition, FROM_USAGE_MACRO, _module, object, alias)
 end
 
