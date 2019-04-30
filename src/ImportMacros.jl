@@ -1,5 +1,3 @@
-__precompile__()
-
 module ImportMacros
 
 using MacroTools: @capture
@@ -62,18 +60,18 @@ for macroname in ("import", "using")
         macro $(Symbol(macroname))(M::Union{Symbol, Expr}, kw::Symbol, m::Symbol)
             # input check
             kw == :as || throw(ArgumentError("syntax error: expected `as`, got `$kw`"))
-            isdefined(m) && throw(ArgumentError("alias `$m` already defined"))
 
             # create operator expression
             names = get_names(M)
-            ex = Expr(Symbol($macroname))
+            ex = Expr(:.)
             for n in names
                 push!(ex.args, n)
             end
+            ex = Expr(Symbol($macroname), ex)
 
             return quote
                 $(esc(ex))
-                const $(esc(m)) = $(esc(M))
+                global const $(esc(m)) = $(esc(M))
                 nothing
             end
         end
@@ -87,19 +85,19 @@ from_error(usage) = throw(ArgumentError("syntax error: expected $usage"))
 
 function _from(condition, usage, _module, object, alias)
     condition || from_error(usage)
-    isdefined(alias) && throw(ArgumentError("alias `$alias` already defined"))
 
     names = get_names(_module)
-    import_expr = Expr(:import)
-    for name in names
-        push!(import_expr.args, name)
+    ex = Expr(:.)
+    for n in names
+        push!(ex.args, n)
     end
+    ex = Expr(:import, ex)
 
     return quote
-        $import_expr
-        const $alias = $_module.$object
+        $(esc(ex))
+        global const $(esc(alias)) = $(esc(_module)).$object
         nothing
-    end |> esc
+    end
 end
 
 macro from(_module::Union{Symbol, Expr}, use::Symbol, object::Symbol, as::Symbol, alias::Symbol)
@@ -119,6 +117,7 @@ end
 # utility function to extract names from expression
 function get_names(x)
     isa(x, Symbol)   && return (x, )
+    isa(x, QuoteNode) && return (x.value, )
     x.head == :quote && return (x.args[1], )
     x.head == :.     && return (get_names(x.args[1])..., get_names(x.args[2])...)
     throw(ArgumentError("invalid module name"))

@@ -1,0 +1,6 @@
+authors = ["Fredrik Ekre <ekrefredrik@gmail.com>"]
+name = "A"
+uuid = "dceeeb18-6b25-11e9-0077-179b04f8c82b"
+version = "0.1.0"
+
+[deps]
