@@ -95,8 +95,17 @@ function create_expression(import_or_using::Symbol, M::Union{Symbol, Expr},
     symbols = get_names(M)
     import_expr = Expr(import_or_using, Expr(:., symbols...))
     rhs_expr = Expr(:escape, object === nothing ? last(symbols) : Expr(:., last(symbols), QuoteNode(object)))
+    if import_or_using === :import # hide M behind a gensym baremodule
+        s = gensym()
+        import_expr = Expr(:module, false, Expr(:escape, s), Expr(:block, import_expr))
+        if rhs_expr.args[1] isa Symbol
+            rhs_expr.args[1] = Expr(:., s, QuoteNode(rhs_expr.args[1]))
+        else # esc expr
+            rhs_expr.args[1] = Expr(:., Expr(:., s, QuoteNode(rhs_expr.args[1].args[1])), rhs_expr.args[1].args[2])
+        end
+    end
     const_expr = Expr(:const, Expr(:global, Expr(:(=), alias, rhs_expr)))
-    return_expr = Expr(:block, import_expr, const_expr, nothing)
+    return_expr = Expr(:toplevel, import_expr, const_expr, nothing)
     return return_expr
 end
 
