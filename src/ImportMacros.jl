@@ -57,53 +57,22 @@ for macroname in ("import", "using")
     @eval begin
         macro $(Symbol(macroname))(M::Union{Symbol, Expr}, kw::Symbol, m::Symbol)
             # input check
-            kw == :as || throw(ArgumentError("syntax error: expected `as`, got `$kw`"))
-
-            # create operator expression
-            names = get_names(M)
-            ex = Expr(:.)
-            for n in names
-                push!(ex.args, n)
+            if kw !== :as
+                throw(ArgumentError("syntax error: expected `@$($macroname) Module as mod`"))
             end
-            ex = Expr(Symbol($macroname), ex)
-
-            return quote
-                $(esc(ex))
-                global const $(esc(m)) = $(esc(M))
-                nothing
-            end
+            return create_expression(Symbol($macroname), M, m)
         end
     end
 end
 
-const FROM_USAGE = "`@from Module use object as alias`"
-const FROM_USAGE_MACRO = "`@from Module use @object as @alias`"
-
-from_error(usage) = throw(ArgumentError("syntax error: expected $usage"))
-
-function _from(condition, usage, _module, object, alias)
-    condition || from_error(usage)
-
-    names = get_names(_module)
-    ex = Expr(:.)
-    for n in names
-        push!(ex.args, n)
+macro from(M::Union{Symbol, Expr}, use::Symbol, object::Symbol, as::Symbol, alias::Symbol)
+    if use !== :use && as !== :as
+        throw(ArgumentError("syntax error: expected `@from Module use object as alias`"))
     end
-    ex = Expr(:import, ex)
-
-    return quote
-        $(esc(ex))
-        global const $(esc(alias)) = $(esc(_module)).$object
-        nothing
-    end
+    return create_expression(:import, M, alias, object)
 end
 
-macro from(_module::Union{Symbol, Expr}, use::Symbol, object::Symbol, as::Symbol, alias::Symbol)
-    condition = use == :use && as == :as
-    _from(condition, FROM_USAGE, _module, object, alias)
-end
-
-macro from(_module::Union{Expr, Symbol}, use::Symbol, expr::Expr)
+macro from(M::Union{Expr, Symbol}, use::Symbol, expr::Expr)
     # expr is something like :(@f as @F)
     object = nothing
     alias = nothing
@@ -115,20 +84,27 @@ macro from(_module::Union{Expr, Symbol}, use::Symbol, expr::Expr)
            alias = expr.args[4].args[1]
         end
     end
-    condition = use == :use && object !== nothing && alias !== nothing
-    _from(condition, FROM_USAGE_MACRO, _module, object, alias)
+    if use !== :use && (object === nothing || alias === nothing)
+        throw(ArgumentError("syntax error: expected `@from Module use @object as @alias`"))
+    end
+    return create_expression(:import, M, alias, object)
 end
 
-macro from(exprs...)
-    from_error("$FROM_USAGE or $FROM_USAGE_MACRO")
+function create_expression(import_or_using::Symbol, M::Union{Symbol, Expr},
+                           alias::Symbol, object=nothing)
+    import_expr = Expr(import_or_using, Expr(:., get_names(M)...))
+    rhs_expr = Expr(:escape, object === nothing ? M : Expr(:., M, QuoteNode(object)))
+    const_expr = Expr(:const, Expr(:global, Expr(:(=), alias, rhs_expr)))
+    return_expr = Expr(:block, import_expr, const_expr, nothing)
+    return return_expr
 end
 
 # utility function to extract names from expression
 function get_names(x)
-    isa(x, Symbol)   && return (x, )
+    isa(x, Symbol)    && return (x, )
     isa(x, QuoteNode) && return (x.value, )
-    x.head == :quote && return (x.args[1], )
-    x.head == :.     && return (get_names(x.args[1])..., get_names(x.args[2])...)
+    x.head === :quote && return (x.args[1], )
+    x.head === :.     && return (get_names(x.args[1])..., get_names(x.args[2])...)
     throw(ArgumentError("invalid module name"))
 end
 
