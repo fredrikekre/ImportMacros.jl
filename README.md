@@ -1,71 +1,95 @@
 # ImportMacros.jl
 
-[![Build Status][travis-img]][travis-url]
-[![Build status][appveyor-img]][appveyor-url]
+| **Build Status**                                                                                |
+|:----------------------------------------------------------------------------------------------- |
+| [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url] [![][codecov-img]][codecov-url] |
 
-Provides three macros: `@import` and `@using` which loads a module and binds it to an alias, and
-`@from` which loads an object from a module and binds it to an alias.
+Provides three macros: `@import` and `@using` which loads a module and binds it to an
+alias, and `@from` which loads an object from a module and binds it to an alias.
 
 ## Usage
 
-`@import` and `@using` macros are used in the same way, although the result is different. For instance the
-module `MyLongModuleName` can be imported and bound to `m` with the following line:
+`@import` and `@using` macros are used in the same way, although the result is different.
+For instance the module `MyLongModuleName` can be imported and bound to `m` with
+the following line:
 
-```jl
-@import MyLongModuleName as m
+```julia
+@import MyLongModuleName as alias
 ```
 
-the result of running the `@import`macro is the same as running
+which is roughly equivalent to
 
-```jl
-import MyLongModuleName
-const m = MyLongModuleName
+```julia
+baremodule $(gensym())
+    import LongModuleName
+end
+const alias = $(gensym()).LongModuleName
 ```
 
 A (shorter) alias can be useful if non-exported functions from modules are used frequently
 in the code. For instance, compare the two different ways of calling the function `foo`
 from the module `MyLongModuleName`:
 
-```jl
-m.foo() # via the alias
+```julia
+alias.foo() # via the alias
 
 MyLongModuleName.foo() # via the original module name
 ```
 
-The syntax for `@using` is the same as for `@import`, the difference being that the module is loaded with
-`using` instead of `import`. This means that exported functions from the module
-can be used directly, and non-exported function can be reached via the alias.
+The syntax for `@using` is the same as for `@import`
+
+```julia
+@using MyLongModuleName as alias
+```
+
+but the result is roughly equivalent to
+
+```julia
+using LongModuleName
+const alias = LongModuleName
+```
 
 The syntax for `@from` is as follows:
 
-```jl
-@from MyModule use my_long_variable_name as v
+```julia
+@from MyModule use my_long_variable_name as alias
 ```
 
-In order to alias a macro use `@` before the macro name:
+and for macros:
 
-```jl
+```julia
 @from MyModule use @my_long_macro_name as @m
+```
+
+Using the `@from` macro is roughly equivalent to
+
+```julia
+baremodule $(gensym())
+    import Module
+end
+const alias = $(gensym()).Module.my_long_variable_name
 ```
 
 ## Installation
 
-The package can be installed by running
+The package can be installed with Julia's package manager,
+either from the Pkg REPL
 
-```jl
-Pkg.clone("https://github.com/fredrikekre/ImportMacros.jl")
+```
+pkg> add https://github.com/fredrikekre/ImportMacros.jl
 ```
 
-in the Julia REPL. The package can be loaded automatically when Julia is started by adding
+or from the Julia REPL
 
-```jl
-using ImportMacros
+```julia
+julia> using Pkg; Pkg.add(PackageSpec(url = "https://github.com/fredrikekre/ImportMacros.jl"))
 ```
-
-to the `.juliarc.jl` file.
 
 [travis-img]: https://travis-ci.org/fredrikekre/ImportMacros.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/fredrikekre/ImportMacros.jl
 
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/ds4d6njhs1t69aak/branch/master?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/fredrikekre/importmacros-jl/branch/master
+
+[codecov-img]: https://codecov.io/gh/fredrikekre/ImportMacros.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/fredrikekre/ImportMacros.jl

@@ -4,50 +4,46 @@ export @import, @using, @from
 
 
 """
-```julia
-@import MyLongModuleName as m
-```
+    @import LongModuleName as alias
 
-Load the module `MyLongModuleName` with `import` and binds it to `m`.
-Equivalent to
+Load the module `LongModuleName` with `import` and binds it to `alias`.
+Roughly equivalent to
 
 ```julia
-import MyLongModuleName
-const m = MyLongModuleName
+baremodule \$(gensym())
+    import LongModuleName
+end
+const alias = \$(gensym()).LongModuleName
 ```
 """
 :(@import)
 
 """
-```julia
-@using MyLongModuleName as m
-```
+    @using LongModuleName as alias
 
-Load the module `MyLongModuleName` with `using` and binds it to `m`.
-Equivalent to
+Load the module `LongModuleName` with `using` and binds it to `alias`.
+Roughly equivalent to
 
 ```julia
-using MyLongModuleName
-const m = MyLongModuleName
+using LongModuleName
+const alias = LongModuleName
 ```
 """
 :(@using)
 
 """
-```julia
-@from Module use object as alias
-@from Module use @object as @alias
-```
+    @from Module use object as alias
+    @from Module use @object as @alias
 
 Load the module `Module` with `import` and bind `object` to `alias`,
 or `@object` to `@alias` in the case of macros.
-
-Equivalent to:
+Roughly equivalent to:
 
 ```julia
-import Module
-const alias = Module.object
-@eval const \$(Symbol("@alias")) = Module.\$(Symbol("@object"))    # macros
+baremodule \$(gensym())
+    import Module
+end
+const alias = \$(gensym()).Module.object
 ```
 """
 :(@from)
@@ -55,12 +51,12 @@ const alias = Module.object
 # generate the macros
 for macroname in ("import", "using")
     @eval begin
-        macro $(Symbol(macroname))(M::Union{Symbol, Expr}, kw::Symbol, m::Symbol)
+        macro $(Symbol(macroname))(M::Union{Symbol, Expr}, kw::Symbol, alias::Symbol)
             # input check
             if kw !== :as
                 throw(ArgumentError("syntax error: expected `@$($macroname) Module as mod`"))
             end
-            return create_expression(Symbol($macroname), M, m)
+            return create_expression(Symbol($macroname), M, alias)
         end
     end
 end
