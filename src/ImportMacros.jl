@@ -92,8 +92,9 @@ end
 
 function create_expression(import_or_using::Symbol, M::Union{Symbol, Expr},
                            alias::Symbol, object=nothing)
-    import_expr = Expr(import_or_using, Expr(:., get_names(M)...))
-    rhs_expr = Expr(:escape, object === nothing ? M : Expr(:., M, QuoteNode(object)))
+    symbols = get_names(M)
+    import_expr = Expr(import_or_using, Expr(:., symbols...))
+    rhs_expr = Expr(:escape, object === nothing ? last(symbols) : Expr(:., last(symbols), QuoteNode(object)))
     const_expr = Expr(:const, Expr(:global, Expr(:(=), alias, rhs_expr)))
     return_expr = Expr(:block, import_expr, const_expr, nothing)
     return return_expr

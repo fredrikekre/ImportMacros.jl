@@ -4,13 +4,13 @@ using ImportMacros, Test, Pkg
 Pkg.develop(PackageSpec(path = joinpath(@__DIR__, "A")))
 
 @testset "@import" begin
-    # A
-    @test (@import A as a) == nothing
-    @import A as a
-    @test_throws UndefVarError foo()
-    @test_throws UndefVarError Foo()
-    @test a.foo()
-    @test a.Foo()
+    # A.B.C
+    @test (@import A.B.C as abc) == nothing
+    @import A.B.C as abc
+    @test_throws UndefVarError baz()
+    @test_throws UndefVarError Baz()
+    @test abc.baz()
+    @test abc.Baz()
 
     # A.B
     @test (@import A.B as ab) == nothing
@@ -20,13 +20,13 @@ Pkg.develop(PackageSpec(path = joinpath(@__DIR__, "A")))
     @test ab.bar()
     @test ab.Bar()
 
-    # A.B.C
-    @test (@import A.B.C as abc) == nothing
-    @import A.B.C as abc
-    @test_throws UndefVarError baz()
-    @test_throws UndefVarError Baz()
-    @test abc.baz()
-    @test abc.Baz()
+    # A
+    @test (@import A as a) == nothing
+    @import A as a
+    @test_throws UndefVarError foo()
+    @test_throws UndefVarError Foo()
+    @test a.foo()
+    @test a.Foo()
 end # testset
 
 @testset "@from" begin
@@ -71,13 +71,13 @@ end # testset
 end
 
 @testset "@using" begin
-    # A
-    @test (@using A as a) == nothing
-    @using A as a
-    @test foo()
-    @test_throws UndefVarError Foo()
-    @test a.foo()
-    @test a.Foo()
+    # A.B.C
+    @test (@using A.B.C as abc) == nothing
+    @using A.B.C as abc
+    @test baz()
+    @test_throws UndefVarError Baz()
+    @test abc.baz()
+    @test abc.Baz()
 
     # A.B
     @test (@using A.B as ab) == nothing
@@ -87,11 +87,11 @@ end
     @test ab.bar()
     @test ab.Bar()
 
-    # A.B.C
-    @test (@using A.B.C as abc) == nothing
-    @using A.B.C as abc
-    @test baz()
-    @test_throws UndefVarError Baz()
-    @test abc.baz()
-    @test abc.Baz()
+    # A
+    @test (@using A as a) == nothing
+    @using A as a
+    @test foo()
+    @test_throws UndefVarError Foo()
+    @test a.foo()
+    @test a.Foo()
 end # testset
