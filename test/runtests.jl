@@ -35,12 +35,12 @@ Pkg.develop(PackageSpec(path = joinpath(@__DIR__, "A")))
     @test a.Foo()
 end # testset
 
-@testset "@from" begin
+@testset "@import with specific objects" begin
     # A.B.C
-    @test (@from A.B.C use baz as bz) == nothing
-    @from A.B.C use baz as bz
-    @from A.B.C use Baz as Bz
-    @from A.B.C use @baz as @bz
+    @test (@import A.B.C.baz as bz) == nothing
+    @import A.B.C.baz as bz
+    @import A.B.C.Baz as Bz
+    @import A.B.C.@baz as @bz
     @test_throws UndefVarError baz()
     @test_throws UndefVarError C.baz()
     @test_throws UndefVarError Baz()
@@ -52,10 +52,10 @@ end # testset
     @test @eval (@bz 1 2 3) == (1, 2, 3)
 
     # A.B
-    @test (@from A.B use bar as b) == nothing
-    @from A.B use bar as b
-    @from A.B use Bar as Br
-    @from A.B use @bar as @b
+    @test (@import A.B.bar as b) == nothing
+    @import A.B.bar as b
+    @import A.B.Bar as Br
+    @import A.B.@bar as @b
     @test_throws UndefVarError bar()
     @test_throws UndefVarError B.bar()
     @test_throws UndefVarError Bar()
@@ -67,11 +67,11 @@ end # testset
     @test @eval (@b 1 2) == (1, 2)
 
     # A
-    @test (@from A use foo as f) == nothing
-    @from A use foo as f
-    @from A use Foo as F
-    @from A use @foo as @f
-    @from A use @Foo as @F
+    @test (@import A.foo as f) == nothing
+    @import A.foo as f
+    @import A.Foo as F
+    @import A.@foo as @f
+    @import A.@Foo as @F
     @test_throws UndefVarError foo()
     @test_throws UndefVarError A.foo()
     @test_throws UndefVarError Foo()

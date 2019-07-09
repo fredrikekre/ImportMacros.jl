@@ -1,17 +1,19 @@
 module ImportMacros
 
-export @import, @using, @from
+export @import, @using
 
 
 """
     @import LongModuleName as alias
+    @import LongModuleName.object as alias
 
 Load the module `LongModuleName` with `import` and binds it to `alias`.
-Roughly equivalent to
+Can also be used for specific objects inside the module.
+The resulting expression is roughly equivalent to
 
 ```julia
 baremodule \$(gensym())
-    import LongModuleName
+    import LongModuleName.object
 end
 const alias = \$(gensym()).LongModuleName
 ```
@@ -31,66 +33,47 @@ const alias = LongModuleName
 """
 :(@using)
 
-"""
-    @from Module use object as alias
-    @from Module use @object as @alias
-
-Load the module `Module` with `import` and bind `object` to `alias`,
-or `@object` to `@alias` in the case of macros.
-Roughly equivalent to:
-
-```julia
-baremodule \$(gensym())
-    import Module
-end
-const alias = \$(gensym()).Module.object
-```
-"""
-:(@from)
-
 # generate the macros
-for macroname in ("import", "using")
-    @eval begin
-        macro $(Symbol(macroname))(M::Union{Symbol, Expr}, kw::Symbol, alias::Symbol)
-            # input check
-            if kw !== :as
-                throw(ArgumentError("syntax error: expected `@$($macroname) Module as mod`"))
-            end
-            return create_expression(Symbol($macroname), M, alias)
+@eval begin
+    # @import version for symbols, e.g. @import A.foo as f
+    macro $(Symbol("import"))(M::Union{Symbol, Expr}, kw::Symbol, alias::Symbol)
+        # input check
+        if kw !== :as
+            throw(ArgumentError("syntax error: expected `@import A.B.object as alias`"))
         end
+        return create_expression(:import, M, alias)
     end
-end
-
-macro from(M::Union{Symbol, Expr}, use::Symbol, object::Symbol, as::Symbol, alias::Symbol)
-    if use !== :use && as !== :as
-        throw(ArgumentError("syntax error: expected `@from Module use object as alias`"))
-    end
-    return create_expression(:import, M, alias, object)
-end
-
-macro from(M::Union{Expr, Symbol}, use::Symbol, expr::Expr)
-    # expr is something like :(@f as @F)
-    object = nothing
-    alias = nothing
-    if expr.head === :macrocall && expr.args[1] isa Symbol
-        object = expr.args[1]
-        if expr.args[2] isa LineNumberNode && expr.args[3] === :as &&
+    # @import version for macros, e.g. @import A.@foo as @f
+    macro $(Symbol("import"))(expr::Expr)
+        M = nothing
+        alias = nothing
+        if expr.head === :macrocall && expr.args[1] isa Expr &&
+           expr.args[2] isa LineNumberNode && expr.args[3] === :as &&
            expr.args[4] isa Expr && expr.args[4].head === :macrocall &&
            expr.args[4].args[1] isa Symbol
+           M = expr.args[1]
            alias = expr.args[4].args[1]
         end
+        if M === nothing || alias === nothing
+            throw(ArgumentError("syntax error: expected `@import A.@object as @alias`"))
+        end
+        return create_expression(:import, M, alias)
     end
-    if use !== :use && (object === nothing || alias === nothing)
-        throw(ArgumentError("syntax error: expected `@from Module use @object as @alias`"))
+    # @using version
+    macro $(Symbol("using"))(M::Union{Symbol, Expr}, kw::Symbol, alias::Symbol)
+        # input check
+        if kw !== :as
+            throw(ArgumentError("syntax error: expected `@using A.B as alias`"))
+        end
+        return create_expression(:using, M, alias)
     end
-    return create_expression(:import, M, alias, object)
 end
 
 function create_expression(import_or_using::Symbol, M::Union{Symbol, Expr},
-                           alias::Symbol, object=nothing)
+                           alias::Symbol)
     symbols = get_names(M)
     import_expr = Expr(import_or_using, Expr(:., symbols...))
-    rhs_expr = Expr(:escape, object === nothing ? last(symbols) : Expr(:., last(symbols), QuoteNode(object)))
+    rhs_expr = Expr(:escape, last(symbols))
     if import_or_using === :import # hide M behind a gensym baremodule
         s = gensym()
         import_expr = Expr(:module, false, Expr(:escape, s), Expr(:block, import_expr))
