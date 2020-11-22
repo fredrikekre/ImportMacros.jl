@@ -1,4 +1,32 @@
-# ImportMacros.jl
+# ⚠️ vvv Deprecation notice vvv ⚠️
+
+This package has been deprecated and the repository archived.
+The functionality is supported natively in Julia 1.6 and above
+(see https://github.com/JuliaLang/julia/pull/37396) with the following syntax:
+
+```julia
+import LinearAlgebra as LA
+
+using LinearAlgebra: cholesky as c, lu as l
+```
+
+For earlier Julia versions it is recommended to use
+[`Compat.jl`](https://github.com/JuliaLang/Compat.jl) instead of this package.
+`Compat.jl` (version 3.21.0 and above) supports the same syntax as implemented
+in Julia 1.6 using the `@copmat` macro:
+
+```julia
+using Compat
+
+@compat import LinearAlgebra as LA
+
+@compat using LinearAlgebra: cholesky as c, lu as l
+```
+
+# ⚠️ ^^^ Deprecation notice ^^^ ⚠️
+
+
+## ImportMacros.jl
 
 | **Build Status**                                                                                |
 |:----------------------------------------------------------------------------------------------- |
@@ -7,7 +35,7 @@
 Provides two macros: `@import` and `@using` which loads a module or object and binds it to
 an alias.
 
-## Usage
+### Usage
 
 `@import` can be used with modules, or specific objects inside modules, to create an alias,
 and to hide the underlying module from the user code. For example
@@ -55,7 +83,7 @@ using LongModuleName
 const alias = LongModuleName
 ```
 
-## Installation
+### Installation
 
 The package can be installed with Julia's package manager,
 either from the Pkg REPL
